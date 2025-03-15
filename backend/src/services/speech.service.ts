@@ -4,18 +4,31 @@ import { config } from '../config/config';
 import { FFmpegService } from '../utils/ffmpeg';
 import { StorageService } from './storage.service';
 import { SpeechClient, protos } from '@google-cloud/speech';
-import { SecretsService } from './secrets.service';
+import { config as dotenvConfig } from 'dotenv';
+import * as fsSync from 'fs';
+
+// Cargar variables de entorno
+dotenvConfig();
 
 export class AudioService {
     private static speechClient: SpeechClient;
 
     static async initialize() {
         try {
-            const credentials = JSON.parse(
-                await SecretsService.getSecret('speech-to-text-sa-key')
-            );
+            if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está definida');
+            }
+
+            const credentialsPath = path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
             
-            this.speechClient = new SpeechClient({ credentials });
+            // Verificar que el archivo existe
+            if (!fsSync.existsSync(credentialsPath)) {
+                throw new Error(`El archivo de credenciales no existe en la ruta: ${credentialsPath}`);
+            }
+            
+            console.log('✅ Speech Service usando archivo de credenciales:', credentialsPath);
+            
+            this.speechClient = new SpeechClient({ keyFilename: credentialsPath });
             console.log('✅ Speech Service inicializado correctamente');
         } catch (error) {
             console.error('❌ Error inicializando Speech Service:', error);

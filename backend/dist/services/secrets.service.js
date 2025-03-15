@@ -7,27 +7,29 @@ exports.SecretsService = void 0;
 const secret_manager_1 = require("@google-cloud/secret-manager");
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = require("dotenv");
+const fs_1 = __importDefault(require("fs"));
 // Cargar variables de entorno
 (0, dotenv_1.config)();
+console.log('🔑 GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
 class SecretsService {
     static initialize() {
         try {
-            // Si GOOGLE_APPLICATION_CREDENTIALS está configurado en el ambiente,
-            // la biblioteca lo usará automáticamente
-            if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-                this.client = new secret_manager_1.SecretManagerServiceClient();
-                console.log('✅ Secret Manager Service inicializado con credenciales del ambiente');
+            if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está definida');
             }
-            else {
-                // Fallback a credenciales locales
-                this.client = new secret_manager_1.SecretManagerServiceClient({
-                    keyFilename: this.CREDENTIALS_PATH
-                });
-                console.log('✅ Secret Manager Service inicializado con credenciales locales');
+            const credentialsPath = path_1.default.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
+            // Verificar que el archivo existe
+            if (!fs_1.default.existsSync(credentialsPath)) {
+                throw new Error(`El archivo de credenciales no existe en la ruta: ${credentialsPath}`);
             }
+            console.log(`✅ Inicializando Secret Manager con credenciales: ${credentialsPath}`);
+            this.client = new secret_manager_1.SecretManagerServiceClient({
+                keyFilename: credentialsPath
+            });
+            console.log('✅ Secret Manager inicializado correctamente');
         }
         catch (error) {
-            console.error('❌ Error inicializando Secret Manager Service:', error);
+            console.error('❌ Error inicializando Secret Manager:', error);
             throw error;
         }
     }
@@ -84,6 +86,3 @@ class SecretsService {
 }
 exports.SecretsService = SecretsService;
 SecretsService.projectId = process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0961962132';
-SecretsService.CREDENTIALS_PATH = process.env.GOOGLE_APPLICATION_CREDENTIALS
-    ? path_1.default.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS)
-    : path_1.default.resolve(process.cwd(), 'gen-lang-client-0961962132-c17aa42ced24.json');

@@ -1,33 +1,37 @@
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import path from 'path';
 import { config as dotenvConfig } from 'dotenv';
+import fs from 'fs';
 
 // Cargar variables de entorno
 dotenvConfig();
+console.log('🔑 GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
 export class SecretsService {
     private static client: SecretManagerServiceClient;
     private static projectId = process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0961962132';
-    private static readonly CREDENTIALS_PATH = process.env.GOOGLE_APPLICATION_CREDENTIALS 
-        ? path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS)
-        : path.resolve(process.cwd(), 'gen-lang-client-0961962132-c17aa42ced24.json');
-
+    
     static initialize() {
         try {
-            // Si GOOGLE_APPLICATION_CREDENTIALS está configurado en el ambiente,
-            // la biblioteca lo usará automáticamente
-            if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-                this.client = new SecretManagerServiceClient();
-                console.log('✅ Secret Manager Service inicializado con credenciales del ambiente');
-            } else {
-                // Fallback a credenciales locales
-                this.client = new SecretManagerServiceClient({
-                    keyFilename: this.CREDENTIALS_PATH
-                });
-                console.log('✅ Secret Manager Service inicializado con credenciales locales');
+            if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está definida');
             }
+
+            const credentialsPath = path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
+            
+            // Verificar que el archivo existe
+            if (!fs.existsSync(credentialsPath)) {
+                throw new Error(`El archivo de credenciales no existe en la ruta: ${credentialsPath}`);
+            }
+            
+            console.log(`✅ Inicializando Secret Manager con credenciales: ${credentialsPath}`);
+            this.client = new SecretManagerServiceClient({
+                keyFilename: credentialsPath
+            });
+            
+            console.log('✅ Secret Manager inicializado correctamente');
         } catch (error) {
-            console.error('❌ Error inicializando Secret Manager Service:', error);
+            console.error('❌ Error inicializando Secret Manager:', error);
             throw error;
         }
     }

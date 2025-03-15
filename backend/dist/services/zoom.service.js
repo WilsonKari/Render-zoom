@@ -114,8 +114,16 @@ class ZoomService {
                     message: 'La URL proporcionada no parece ser una URL de Zoom válida'
                 };
             }
-            // Lanzar navegador para verificar la URL
-            browser = await playwright_1.chromium.launch({ headless: true });
+            // Lanzar navegador para verificar la URL con configuración optimizada para entornos sin interfaz gráfica
+            browser = await playwright_1.chromium.launch({
+                headless: true,
+                args: [
+                    '--disable-dev-shm-usage',
+                    '--disable-setuid-sandbox',
+                    '--no-sandbox',
+                    '--disable-gpu'
+                ]
+            });
             const context = await browser.newContext();
             const page = await context.newPage();
             // Configura un timeout razonable para cargar la página
@@ -324,8 +332,16 @@ class ZoomService {
         console.log('🚀 No se encontraron archivos descargados. Iniciando descarga automatizada...');
         let browser = null;
         try {
-            // Lanzar navegador en modo headless
-            browser = await playwright_1.chromium.launch({ headless: true });
+            // Lanzar navegador en modo headless con configuración optimizada para entornos sin interfaz gráfica
+            browser = await playwright_1.chromium.launch({
+                headless: true,
+                args: [
+                    '--disable-dev-shm-usage',
+                    '--disable-setuid-sandbox',
+                    '--no-sandbox',
+                    '--disable-gpu'
+                ]
+            });
             // Crear un nuevo contexto
             const context = await browser.newContext({ acceptDownloads: true });
             // Abrir una nueva página

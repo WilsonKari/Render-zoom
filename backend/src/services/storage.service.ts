@@ -2,7 +2,10 @@ import { Storage } from '@google-cloud/storage';
 import { config } from '../config/config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SecretsService } from './secrets.service';
+import { config as dotenvConfig } from 'dotenv';
+
+// Cargar variables de entorno
+dotenvConfig();
 
 export class StorageService {
     private static storage: Storage;
@@ -10,11 +13,20 @@ export class StorageService {
 
     static async initialize() {
         try {
-            const credentials = JSON.parse(
-                await SecretsService.getSecret('speech-to-text-sa-key')
-            );
+            if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está definida');
+            }
+
+            const credentialsPath = path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
             
-            this.storage = new Storage({ credentials });
+            // Verificar que el archivo existe
+            if (!fs.existsSync(credentialsPath)) {
+                throw new Error(`El archivo de credenciales no existe en la ruta: ${credentialsPath}`);
+            }
+            
+            console.log('🔑 Storage Service usando archivo de credenciales:', credentialsPath);
+            
+            this.storage = new Storage({ keyFilename: credentialsPath });
             this.bucket = this.storage.bucket(config.google.storageBucket);
             console.log('✅ Storage Service inicializado correctamente');
         } catch (error) {

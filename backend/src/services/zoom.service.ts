@@ -117,8 +117,16 @@ export class ZoomService {
                 };
             }
             
-            // Lanzar navegador para verificar la URL
-            browser = await chromium.launch({ headless: true });
+            // Lanzar navegador para verificar la URL con configuración optimizada para entornos sin interfaz gráfica
+            browser = await chromium.launch({
+                headless: true,
+                args: [
+                    '--disable-dev-shm-usage',
+                    '--disable-setuid-sandbox',
+                    '--no-sandbox',
+                    '--disable-gpu'
+                ]
+            });
             const context = await browser.newContext();
             const page = await context.newPage();
             
@@ -360,8 +368,16 @@ export class ZoomService {
         let browser: Browser | null = null;
         
         try {
-            // Lanzar navegador en modo headless
-            browser = await chromium.launch({ headless: true });
+            // Lanzar navegador en modo headless con configuración optimizada para entornos sin interfaz gráfica
+            browser = await chromium.launch({
+                headless: true,
+                args: [
+                    '--disable-dev-shm-usage',
+                    '--disable-setuid-sandbox',
+                    '--no-sandbox',
+                    '--disable-gpu'
+                ]
+            });
             
             // Crear un nuevo contexto
             const context = await browser.newContext({ acceptDownloads: true });
