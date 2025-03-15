@@ -2,6 +2,7 @@
 backend/node_modules/
 backend/.env
 backend/uploads/
+backend/gen-lang-client-*.json
 
 # Frontend
 frontend/node_modules/

@@ -16,7 +16,7 @@ npm install
 Crear un archivo `.env` en la carpeta `backend` con las siguientes variables:
 ```
 PORT=8080
-GOOGLE_APPLICATION_CREDENTIALS=gen-lang-client-0961962132-1afd1324c445.json
+GOOGLE_APPLICATION_CREDENTIALS=gen-lang-client-0961962132-c17aa42ced24.json
 GOOGLE_STORAGE_BUCKET=speech-to-text-app-bucket-123
 SPEECH_TO_TEXT_LANGUAGE=es-ES
 SPEECH_TO_TEXT_MODEL=latest_long
