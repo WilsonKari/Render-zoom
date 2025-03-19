@@ -182,9 +182,12 @@ class StorageService {
         try {
             if (filePath.startsWith('gs://')) {
                 // Es un archivo en Cloud Storage
-                const fileName = filePath.split('/').pop();
-                if (fileName) {
-                    await this.deleteFile(fileName);
+                // Extraer la ruta completa después del bucket
+                const bucketName = config_1.config.google.storageBucket;
+                const fullPath = filePath.replace(`gs://${bucketName}/`, '');
+                console.log(`Intentando eliminar archivo de Cloud Storage: ${fullPath}`);
+                if (fullPath) {
+                    await this.deleteFile(fullPath);
                 }
             }
             else {
@@ -195,7 +198,7 @@ class StorageService {
             }
         }
         catch (error) {
-            console.error('Error al limpiar archivo temporal:', error);
+            console.warn(`⚠️ No se pudo eliminar el archivo ${filePath}: ${error}`);
         }
     }
 }

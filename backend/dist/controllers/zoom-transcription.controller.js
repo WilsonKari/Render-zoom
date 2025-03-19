@@ -260,10 +260,13 @@ class ZoomTranscriptionController {
             }
             try {
                 if (filePath.startsWith('gs://')) {
-                    const fileName = filePath.split('/').pop();
-                    if (fileName) {
-                        await storage_service_1.StorageService.deleteFile(fileName);
-                        console.log(`🗑️ Archivo eliminado de Cloud Storage: ${fileName}`);
+                    // Extraer la ruta completa desde el bucket
+                    const bucketName = config_1.config.google.storageBucket;
+                    const fullPath = filePath.replace(`gs://${bucketName}/`, '');
+                    console.log(`Intentando eliminar archivo de Cloud Storage: ${fullPath}`);
+                    if (fullPath) {
+                        await storage_service_1.StorageService.deleteFile(fullPath);
+                        console.log(`🗑️ Archivo eliminado de Cloud Storage: ${fullPath}`);
                     }
                 }
                 else if (fs.existsSync(filePath)) {
